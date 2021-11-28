@@ -28,11 +28,8 @@ app.get("/app/", (req, res, next) => {
 // CREATE a new user (HTTP method POST) at endpoint /app/new/
 app.post("/app/new", (req, res) => {
 	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?, ?)").run(req.body.user, md5(req.body.pass));
-	res.status(201).send({"message": stmt.changes + "record created: ID + " + stmt.lastInsertRowid + " (201"});
-	
+	res.status(201).json({"message" : " " +stmt.changes + " record created: ID " + stmt.lastInsertRowid + " (201"});
 });
-
-
 // READ a list of all users (HTTP method GET) at endpoint /app/users/
 app.get("/app/users", (req, res) => {	
 	const stmt = db.prepare("SELECT * FROM userinfo").all();
@@ -41,18 +38,18 @@ app.get("/app/users", (req, res) => {
 
 // READ a single user (HTTP method GET) at endpoint /app/user/:id
 app.get("/app/user/:id",  (req, res) => {
-	const stmt = db.prepare("SELECT * FROM userinfo").get(req.params.id);
+	const stmt = db.prepare("SELECT * FROM userinfo").all();
 	res.status(200).json(stmt);
 });
 // UPDATE a single user (HTTP method PATCH) at endpoint /app/update/user/:id
 app.patch("/app/update/user/:id", (req, res) => {
 	const stmt = db.prepare("UPDATE userinfo SET user = COALESCE(?,user), pass = COALESCE(?,pass) WHERE id = ?").run(req.body.user, req.body.pass, req.params.id)
-	res.status(200).send({"message": stmt.changes + "record created: ID + " + stmt.lastInsertRowid + " (200"});
+	res.status(405).json(stmt); 
 });
 // DELETE a single user (HTTP method DELETE) at endpoint /app/delete/user/:id
 app.delete("/app/delete/user/:id", (req, res) => {
 	const stmt = db.prepare("DELETE FROM userinfo WHERE id = ?").run(req.params.id);
-	res.status(200).send({"message": stmt.changes + "record created: ID + " + stmt.lastInsertRowid + " (200"});
+	res.status(405).json(stmt.changes);
 });
 // Default response for any other request
 app.use(function(req, res){
