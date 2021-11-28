@@ -26,11 +26,14 @@ app.get("/app/", (req, res, next) => {
 
 // Define other CRUD API endpoints using express.js and better-sqlite3
 // CREATE a new user (HTTP method POST) at endpoint /app/new/
-app.post("/app/new", (req, res) => {
-	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?, ?)").run(req.body.user, md5(req.body.pass));
+app.post("/app/new/", (req, res) => {
+	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?, ?)");
+	const stmt = stmt.run(req.body.user, md5(req.body.pass));
 	res.json({"message" : " " +stmt.changes + " record created: ID " + stmt.lastInsertRowid + " (201)"});
 	res.status(201)
 });
+
+
 // READ a list of all users (HTTP method GET) at endpoint /app/users/
 app.get("/app/users", (req, res) => {	
 	const stmt = db.prepare("SELECT * FROM userinfo").all();
@@ -44,14 +47,15 @@ app.get("/app/user/:id",  (req, res) => {
 });
 // UPDATE a single user (HTTP method PATCH) at endpoint /app/update/user/:id
 app.patch("/app/update/user/:id", (req, res) => {
-	const stmt = db.prepare("UPDATE userinfo SET user = COALESCE(?,user), pass = COALESCE(?,pass) WHERE id = ?").run(req.body.user, md5(req.body.pass), req.params.id)
-	res.json({"message" : " " +stmt.changes + " record created: ID " + stmt.lastInsertRowid + " (200)"});
-	res.status(200)
+	const stmt = db.prepare("UPDATE userinfo SET user = COALESCE(?,user), pass = COALESCE(?,pass) WHERE id = ?");
+	const stmt = stmt.run(req.body.user, md5(req.body.pass), req.params.id);
+	res.json({"message" : " " +stmt.changes + " record created: ID " + req.params.id + " (200)"});
+	res.status(200);
 });
 // DELETE a single user (HTTP method DELETE) at endpoint /app/delete/user/:id
 app.delete("/app/delete/user/:id", (req, res) => {
 	const stmt = db.prepare("DELETE FROM userinfo WHERE id = ?").run(req.params.id);
-	res.json({"message" : " " +stmt.changes + " record created: ID " + stmt.lastInsertRowid + " (200)"});
+	res.json({"message" : " " +stmt.changes + " record created: ID " + req.params.id + " (200)"});
 	res.status(200)
 });
 // Default response for any other request
